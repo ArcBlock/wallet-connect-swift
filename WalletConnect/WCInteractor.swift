@@ -12,6 +12,7 @@ public typealias SessionRequestClosure = (_ id: Int64, _ peerParam: WCSessionReq
 public typealias DisconnectClosure = (Error?) -> Void
 public typealias CustomRequestClosure = (_ id: Int64, _ request: [String: Any]) -> Void
 public typealias ErrorClosure = (Error) -> Void
+public typealias ConnectedClosure = () -> Void
 
 public enum WCInteractorState {
     case connected
@@ -37,6 +38,7 @@ open class WCInteractor {
     public var onDisconnect: DisconnectClosure?
     public var onError: ErrorClosure?
     public var onCustomRequest: CustomRequestClosure?
+    public var onConnected: ConnectedClosure?
 
     // outgoing promise resolvers
     private var connectResolver: Resolver<Bool>?
@@ -260,6 +262,7 @@ extension WCInteractor {
         connectResolver?.fulfill(true)
         connectResolver = nil
 
+        onConnected?()
         state = .connected
     }
 

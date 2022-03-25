@@ -49,8 +49,8 @@ open class WCInteractor {
     private weak var sessionTimer: Timer?
     private let sessionRequestTimeout: TimeInterval
 
-    private var peerId: String?
-    private var peerMeta: WCPeerMeta?
+    public private(set) var peerId: String?
+    public private(set) var peerMeta: WCPeerMeta?
 
     public init(session: WCSession, meta: WCPeerMeta, uuid: UUID, sessionRequestTimeout: TimeInterval = 20) {
         self.session = session

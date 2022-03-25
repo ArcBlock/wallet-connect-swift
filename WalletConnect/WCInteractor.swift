@@ -175,10 +175,14 @@ extension WCInteractor {
 
     private func encryptAndSend(data: Data) -> Promise<Void> {
         WCLog("==> encrypt: \(String(data: data, encoding: .utf8)!) ")
+        guard let peerId = peerId else {
+            WCLog("==> sent error: need peerId")
+            return Promise()
+        }
         let encoder = JSONEncoder()
         let payload = try! WCEncryptor.encrypt(data: data, with: session.key)
         let payloadString = encoder.encodeAsUTF8(payload)
-        let message = WCSocketMessage(topic: session.topic, type: .pub, payload: payloadString)
+        let message = WCSocketMessage(topic: peerId, type: .pub, payload: payloadString)
         let data = message.encoded
         return Promise { seal in
             socket.write(data: data) {

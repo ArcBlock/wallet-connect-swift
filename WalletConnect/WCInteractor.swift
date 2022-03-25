@@ -233,9 +233,9 @@ extension WCInteractor {
         }
 
         // we only setup timer for new sessions
-//         sessionTimer = Timer.scheduledTimer(withTimeInterval: sessionRequestTimeout, repeats: false) { [weak self] _ in
-//             self?.onSessionRequestTimeout()
-//         }
+        sessionTimer = Timer.scheduledTimer(withTimeInterval: sessionRequestTimeout, repeats: false) { [weak self] _ in
+            self?.onSessionRequestTimeout()
+        }
     }
 
     private func stopTimers() {

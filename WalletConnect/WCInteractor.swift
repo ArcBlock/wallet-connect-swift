@@ -178,7 +178,7 @@ extension WCInteractor {
         let encoder = JSONEncoder()
         let payload = try! WCEncryptor.encrypt(data: data, with: session.key)
         let payloadString = encoder.encodeAsUTF8(payload)
-        let message = WCSocketMessage(topic: peerId ?? session.topic, type: .pub, payload: payloadString)
+        let message = WCSocketMessage(topic: session.topic, type: .pub, payload: payloadString)
         let data = message.encoded
         return Promise { seal in
             socket.write(data: data) {

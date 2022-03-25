@@ -110,6 +110,13 @@ open class WCInteractor {
 
         WCSessionStore.clear(session.topic)
     }
+    
+    // 用自带的WCSessionStore老赋值不上peerId 
+    open func recover(peerId: String, peerMeta: WCPeerMeta) {
+        self.peerId = peerId
+        self.peerMeta = peerMeta
+    }
+
 
     open func approveSession(accounts: [String], chainId: Int) -> Promise<Void> {
         guard handshakeId > 0 else {
@@ -230,9 +237,13 @@ extension WCInteractor {
 
     private func checkExistingSession() {
         // check if it's an existing session
-        if let existing = WCSessionStore.load(session.topic), existing.session == session {
-            peerId = existing.peerId
-            peerMeta = existing.peerMeta
+//         if let existing = WCSessionStore.load(session.topic), existing.session == session {
+//             peerId = existing.peerId
+//             peerMeta = existing.peerMeta
+//             return
+//         }
+        
+        if peerId != nil {
             return
         }
 

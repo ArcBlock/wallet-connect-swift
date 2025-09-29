@@ -20,10 +20,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
-        rootViewController?.applicationWillEnterForeground(application)
+//        rootViewController?.applicationWillEnterForeground(application)
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
-        rootViewController?.applicationDidEnterBackground(application)
+//        rootViewController?.applicationDidEnterBackground(application)
     }
 }

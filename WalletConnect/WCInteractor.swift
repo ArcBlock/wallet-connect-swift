@@ -21,7 +21,7 @@ public enum WCInteractorState {
     case disconnected
 }
 
-open class WCInteractor {
+open class WCInteractor: WebSocketDelegate {
     public let session: WCSession
 
     public private(set) var state: WCInteractorState
@@ -48,6 +48,7 @@ open class WCInteractor {
     private weak var pingTimer: Timer?
     private weak var sessionTimer: Timer?
     private let sessionRequestTimeout: TimeInterval
+    private var isSocketConnected: Bool = false
 
     public private(set) var peerId: String?
     public private(set) var peerMeta: WCPeerMeta?
@@ -59,19 +60,17 @@ open class WCInteractor {
         self.sessionRequestTimeout = sessionRequestTimeout
         self.state = .disconnected
 
-        var request = URLRequest(url: session.bridge)
-        request.timeoutInterval = sessionRequestTimeout
-        self.socket = WebSocket(request: request)
-
+        // 先初始化所有存储属性
         self.eth = WCEthereumInteractor()
         self.bnb = WCBinanceInteractor()
         self.trust = WCTrustInteractor()
 
-        socket.onConnect = { [weak self] in self?.onConnect() }
-        socket.onDisconnect = { [weak self] error in self?.onDisconnect(error: error) }
-        socket.onText = { [weak self] text in self?.onReceiveMessage(text: text) }
-        socket.onPong = { _ in WCLog("<== pong") }
-        socket.onData = { data in WCLog("<== websocketDidReceiveData: \(data.toHexString())") }
+        var request = URLRequest(url: session.bridge)
+        request.timeoutInterval = sessionRequestTimeout
+        self.socket = WebSocket(request: request)
+        
+        // 在所有属性初始化完成后再设置 delegate
+        self.socket.delegate = self
     }
 
     deinit {
@@ -79,7 +78,7 @@ open class WCInteractor {
     }
 
     open func connect() -> Promise<Bool> {
-        if socket.isConnected {
+        if isSocketConnected {
             return Promise.value(true)
         }
         socket.connect()
@@ -91,7 +90,7 @@ open class WCInteractor {
 
     open func pause() {
         state = .paused
-        socket.disconnect(forceTimeout: nil, closeCode: CloseCode.goingAway.rawValue)
+        socket.disconnect(closeCode: CloseCode.goingAway.rawValue)
     }
 
     open func resume() {
@@ -229,9 +228,9 @@ extension WCInteractor {
     }
 
     private func setupPingTimer() {
-        pingTimer = Timer.scheduledTimer(withTimeInterval: 15, repeats: true) { [weak socket] _ in
+        pingTimer = Timer.scheduledTimer(withTimeInterval: 15, repeats: true) { [weak self] _ in
             WCLog("==> ping")
-            socket?.write(ping: Data())
+            self?.socket.write(ping: Data())
         }
     }
 
@@ -301,7 +300,10 @@ extension WCInteractor {
     private func onReceiveMessage(text: String) {
         WCLog("<== receive: \(text)")
         // handle ping in text format :(
-        if text == "ping" { return socket.write(pong: Data()) }
+        if text == "ping" { 
+            socket.write(pong: Data())
+            return
+        }
         guard let (topic, payload) = WCEncryptionPayload.extract(text) else { return }
         do {
             let decrypted = try WCEncryptor.decrypt(payload: payload, with: session.key)
@@ -320,6 +322,46 @@ extension WCInteractor {
         } catch let error {
             onError?(error)
             WCLog("==> onReceiveMessage error: \(error.localizedDescription)")
+        }
+    }
+}
+
+// MARK: - WebSocketDelegate
+extension WCInteractor {
+    public func didReceive(event: WebSocketEvent, client: WebSocketClient) {
+        switch event {
+        case .connected(let headers):
+            WCLog("<== websocketDidConnect: \(headers)")
+            isSocketConnected = true
+            onConnect()
+        case .disconnected(let reason, let code):
+            WCLog("<== websocketDidDisconnect: \(reason) code: \(code)")
+            isSocketConnected = false
+            onDisconnect(error: nil)
+        case .text(let text):
+            onReceiveMessage(text: text)
+        case .binary(let data):
+            WCLog("<== websocketDidReceiveData: \(data.toHexString())")
+        case .ping(_):
+            break
+        case .pong(_):
+            WCLog("<== pong")
+        case .viabilityChanged(_):
+            break
+        case .reconnectSuggested(_):
+            break
+        case .cancelled:
+            WCLog("<== websocket cancelled")
+            isSocketConnected = false
+            onDisconnect(error: nil)
+        case .error(let error):
+            WCLog("<== websocket error: \(String(describing: error))")
+            isSocketConnected = false
+            onDisconnect(error: error)
+        case .peerClosed:
+            WCLog("<== websocket peer closed")
+            isSocketConnected = false
+            onDisconnect(error: nil)
         }
     }
 }

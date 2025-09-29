@@ -328,7 +328,7 @@ extension WCInteractor {
 
 // MARK: - WebSocketDelegate
 extension WCInteractor {
-    public func didReceive(event: WebSocketEvent, client: WebSocketClient) {
+    public func didReceive(event: WebSocketEvent, client: WebSocket) {
         switch event {
         case .connected(let headers):
             WCLog("<== websocketDidConnect: \(headers)")
@@ -358,10 +358,6 @@ extension WCInteractor {
             WCLog("<== websocket error: \(String(describing: error))")
             isSocketConnected = false
             onDisconnect(error: error)
-        case .peerClosed:
-            WCLog("<== websocket peer closed")
-            isSocketConnected = false
-            onDisconnect(error: nil)
         }
     }
 }

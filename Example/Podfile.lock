@@ -9,7 +9,7 @@ PODS:
     - PromiseKit/CorePromise
   - PromiseKit/UIKit (6.11.0):
     - PromiseKit/CorePromise
-  - Starscream (4.0.8)
+  - Starscream (4.0.4)
   - SwiftLint (0.36.0)
   - TrustWalletCore (4.3.12):
     - TrustWalletCore/Core (= 4.3.12)
@@ -20,7 +20,7 @@ PODS:
   - WalletConnect (0.1.0):
     - CryptoSwift
     - PromiseKit
-    - Starscream (~> 4.0.0)
+    - Starscream (= 4.0.4)
   - WalletCoreSwiftProtobuf (1.29.0)
 
 DEPENDENCIES:
@@ -44,10 +44,10 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   CryptoSwift: 6b6e488df0598b3e9fa49254ed1a65e8c1b1e10b
   PromiseKit: e4863d06976e7dee5e41c04fc7371c16b3600292
-  Starscream: 19b5533ddb925208db698f0ac508a100b884a1b9
+  Starscream: 5178aed56b316f13fa3bc55694e583d35dd414d9
   SwiftLint: fc9859e4e1752340664851f667bb1898b9c90114
   TrustWalletCore: 363bf2f25823594fdbdba25cac801801777233cb
-  WalletConnect: f2dce34e49129599de8ebc86d41d5365968b94d4
+  WalletConnect: a1c3656819af3f6e7703b14e72f4f73c40f8c68a
   WalletCoreSwiftProtobuf: a4798576a2d309511fc45f81843d348732ec571d
 
 PODFILE CHECKSUM: 807ab98d8e0a043e3f6381f85d2ab65775725fc9
